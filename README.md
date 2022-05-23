@@ -1,7 +1,5 @@
 # Summary
 
-[TOC]
-
 ## THORChain # 1
 
 Official Report: https://medium.com/thorchain/eth-parsing-error-and-exploit-3b343aa6466f
