@@ -108,6 +108,28 @@ Please note that except Ethereum and BSC we additionally support Fantom blockcha
 
 Official Report: https://medium.com/@QubitFin/protocol-exploit-report-305c34540fa3
 
+In particular, we find four unreported suspicious transactions in Qubit Bridge. One of them (0x5af141b2c19cc8cb77a5583654575a6811664ebc304b75e687a6e356b7dd7cf7) is 43 days before (Dec 15, 2021) the major attack on Qubit Bridge on Jan 27, 2022. The left three transactions (0xbcb7adffc8dd56a1c11629132df7c4b909c528bd1075999e31b9f9dd661a9a4e, 0x86eae37600d7a74433b0aed6cd9c3d0dd7147c01287a93f09b0178cdec5e1130, 0xcf205cf4625d5a065cb2cd806e23e6d9b0235890e4934a7ee665c9484a5a2a56) happened on the same day as the major attack. 
+
+Those four suspicious transactions share a similar execution trace and result in the same execution result, i.e., generating a deposit event without locking any assets. We compare their trace with reported attack transactions as follows.
+
+**Reported Attack Transactions**
+
+![Attack Transaction](./asset2.png)
+
+The detailed invocation flow is available at https://versatile.blocksecteam.com/tx/eth/0xeb9f622e54253b3fa14dcee243bc9345a8fbc562168e973093ffc86d7f8a5829
+
+The bug happens in Step 4. The expected functionality is that QBridgeHandler calls the Corresponding ETH Token Contract and transfers user's tokens to the router contract. However, due to bugs in on-chain contracts, QBridgeHandler called the NULL ADDRESS (0x0). So the transferFrom didn't fail, and the deposit function ended normally regardless of the amount value.
+
+**Detected Suspicious Transaction**
+
+We take 0x5af141b2c19cc8cb77a5583654575a6811664ebc304b75e687a6e356b7dd7cf7 as an example. 
+
+![Suspicious Transaction](./asset1.png)
+
+The detailed invocation flow is available at https://versatile.blocksecteam.com/tx/eth/0x5af141b2c19cc8cb77a5583654575a6811664ebc304b75e687a6e356b7dd7cf7.
+
+We can see this transaction shares a similar trace with reported attack transactions and also call transferFrom of the NULL ADDRESS. The transferFrom didn’t fail, and the deposit function ended normally with a valid (but malicious) Deposit Event. If this suspicious and unnoticed transaction had been detected in time, the major attack causing 80M dollars loss might have been prevented. 
+
 | Index | Transactions Detected                                        | Chain    | Attack Type                   | Reported/Unreported (Y/N) |
 | ----- | ------------------------------------------------------------ | -------- | ----------------------------- | ------------------------- |
 | 1     | 0x5af141b2c19cc8cb77a5583654575a6811664ebc304b75e687a6e356b7dd7cf7 | Ethereum | Unrestricted Deposit Emitting | N                         |
